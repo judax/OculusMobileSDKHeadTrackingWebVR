@@ -1,4 +1,14 @@
 (function() {
+
+	window.addEventListener('error', function(event) {
+		var errorMessage = event.message;
+		var url = event.filename;
+		var lineNumber = event.lineno;
+		var columnNumber = event.colno;
+		alert("ERROR: " + errorMessage + " at " + url + " : " + lineNumber + " : " + columnNumber);
+	});
+
+
 	var extensionPresent = typeof(OculusMobileSDKHeadTracking) != 'undefined';
 	if (extensionPresent && !navigator.getVRDevices) {
 		// I love explicit names, but a simpler one makes my life easier
@@ -49,10 +59,10 @@
 		// VREyeParameters 
 		VREyeParameters = function() {
 			this.minimumFieldOfView = new VRFieldOfView();
-			this.maximumFieldOfView = new VRFieldOfView();
-			this.recommendedFieldOfView = new VRFieldOfView();
+			this.maximumFieldOfView = this.minimumFieldOfView;
+			this.recommendedFieldOfView = this.minimumFieldOfView;
 			this.eyeTranslation = new DOMPoint();
-			this.currentFieldOfView = new VRFieldOfView();
+			this.currentFieldOfView = this.minimumFieldOfView;
 			this.renderRect = new DOMRect();
 			return this;
 		};
@@ -61,7 +71,7 @@
 		VRPositionState = function() {
 			this.timeStamp = 0;
 			this.hasPosition = false;
-			this.position = new DOMPoint();
+			this.position = null; // The Oculus Mobile SDK does not povide position for now... maybe in the furture?
 			this.linearVelocity = new DOMPoint();
 			this.linearAcceleration = new DOMPoint();
 			this.hasOrientation = true;
@@ -113,18 +123,77 @@
 			};
 			this.resetSensor = function() {
 			};
+			// Not in the official WebVR API
+			this.zeroSensor = function() {
+			};
 			return this;
 		};
 		PositionSensorVRDevice.inherits(VRDevice);
 
-		var devices = [
-			new HMDVRDevice(),
-			new PositionSensorVRDevice()
-		];
+		// The VR devices
+		var devices = null;
+		// The promise resolvers for those promises created before the start event is received === devices are created.
+		var resolvers = [];
+
+		// Listen to the start event
+		extension.addEventListener('start', function(event) {
+			// Create the HMD VR device
+			var hmdVRDevice = new HMDVRDevice();
+			// Setup left/right eye parameters depending on the information from the event.
+			// FOVs
+			var rightEyeParameters = hmdVRDevice.getEyeParameters('right');
+			var leftEyeParameters = hmdVRDevice.getEyeParameters('left');
+			var upDegrees = event.yFOV / 2;
+			var downDegrees = upDegrees;
+			var rightDegrees = event.xFOV / 2;
+			var leftDegrees = rightDegrees;
+			rightEyeParameters.minimumFieldOfView.upDegrees = leftEyeParameters.minimumFieldOfView.upDegrees = upDegrees;
+			rightEyeParameters.minimumFieldOfView.downDegrees = leftEyeParameters.minimumFieldOfView.downDegrees = downDegrees;
+			rightEyeParameters.minimumFieldOfView.rightDegrees = leftEyeParameters.minimumFieldOfView.rightDegrees = rightDegrees;
+			rightEyeParameters.minimumFieldOfView.leftDegrees = leftEyeParameters.minimumFieldOfView.leftDegrees = leftDegrees;
+			// InterpupillaryDistance
+			var eyeTranslation = Math.abs(event.interpupillaryDistance) / 2;
+			rightEyeParameters.eyeTranslation = eyeTranslation;
+			leftEyeParameters.eyeTranslation = -eyeTranslation;
+			// Rendering rectangles based on the full screen size
+			var fullScreenWidth = window.innerWidth;
+			var fullScreenHeight = window.innerHeight;
+			var eyeWidth = fullScreenWidth / 2;
+			var eyeHeight = fullScreenHeight / 2;
+			rightEyeParameters.renderRect.x = rightEyeParameters.renderRect.left = eyeWidth;
+			rightEyeParameters.renderRect.right = rightEyeParameters.renderRect.x + eyeWidth;
+			rightEyeParameters.renderRect.bottom = eyeHeight;
+			leftEyeParameters.renderRect.x = 0;
+			leftEyeParameters.renderRect.right = eyeWidth;
+			leftEyeParameters.renderRect.bottom = eyeHeight;
+			rightEyeParameters.renderRect.y = rightEyeParameters.renderRect.top = leftEyeParameters.renderRect.y = leftEyeParameters.renderRect.top = 0;
+			// Create the position sensor VR device
+			var positionSensorVRDevice = new PositionSensorVRDevice();					
+			// Create the devices array and resolve the promise
+			devices = [];
+			devices.push(hmdVRDevice);
+			devices.push(positionSensorVRDevice);
+			// Notify the registered resolvers (if any)
+			for (var i = 0; i < resolvers.length; i++) {
+				resolvers[i](devices);
+			}
+			resolvers = [];
+		});
+
+		// Start the extension
+		extension.start();
+
 		navigator.getVRDevices = function() {
 			return new Promise(
 				function(resolve, reject) {
-					resolve(devices);
+					// If we already have devices, reosolve the promise
+					if (devices !== null) {
+						resolve(devices);
+					}
+					// If there are no devices yet, register the resolver to notify them when the extension starts
+					else {
+						resolvers.push(resolve);
+					}
 				});
 		}
 	}
