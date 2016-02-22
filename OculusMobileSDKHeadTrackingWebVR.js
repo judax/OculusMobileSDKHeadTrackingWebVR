@@ -158,7 +158,7 @@
 			leftEyeParameters.eyeTranslation.x = -eyeTranslation;
 			// Rendering rectangles based on the full screen size
 			var fullScreenWidth = window.innerWidth * window.devicePixelRatio;
-			var fullScreenHeight = window.innerHeight * window.devicePixeRatio;
+			var fullScreenHeight = window.innerHeight * window.devicePixelRatio;
 			var eyeWidth = fullScreenWidth / 2;
 			var eyeHeight = fullScreenHeight / 2;
 			rightEyeParameters.renderRect.x = rightEyeParameters.renderRect.left = eyeWidth;
