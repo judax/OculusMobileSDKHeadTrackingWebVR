@@ -10,6 +10,7 @@
 
 
 	var extensionPresent = typeof(OculusMobileSDKHeadTracking) != 'undefined';
+
 	if (extensionPresent && !navigator.getVRDevices) {
 		// I love explicit names, but a simpler one makes my life easier
 		var extension = OculusMobileSDKHeadTracking;
@@ -153,11 +154,11 @@
 			rightEyeParameters.minimumFieldOfView.leftDegrees = leftEyeParameters.minimumFieldOfView.leftDegrees = leftDegrees;
 			// InterpupillaryDistance
 			var eyeTranslation = Math.abs(event.interpupillaryDistance) / 2;
-			rightEyeParameters.eyeTranslation = eyeTranslation;
-			leftEyeParameters.eyeTranslation = -eyeTranslation;
+			rightEyeParameters.eyeTranslation.x = eyeTranslation;
+			leftEyeParameters.eyeTranslation.x = -eyeTranslation;
 			// Rendering rectangles based on the full screen size
-			var fullScreenWidth = window.innerWidth;
-			var fullScreenHeight = window.innerHeight;
+			var fullScreenWidth = window.innerWidth * window.devicePixelRatio;
+			var fullScreenHeight = window.innerHeight * window.devicePixeRatio;
 			var eyeWidth = fullScreenWidth / 2;
 			var eyeHeight = fullScreenHeight / 2;
 			rightEyeParameters.renderRect.x = rightEyeParameters.renderRect.left = eyeWidth;
@@ -167,6 +168,8 @@
 			leftEyeParameters.renderRect.right = eyeWidth;
 			leftEyeParameters.renderRect.bottom = eyeHeight;
 			rightEyeParameters.renderRect.y = rightEyeParameters.renderRect.top = leftEyeParameters.renderRect.y = leftEyeParameters.renderRect.top = 0;
+			rightEyeParameters.renderRect.width = leftEyeParameters.renderRect.width = eyeWidth;
+			rightEyeParameters.renderRect.height = leftEyeParameters.renderRect.height = fullScreenHeight;
 			// Create the position sensor VR device
 			var positionSensorVRDevice = new PositionSensorVRDevice();					
 			// Create the devices array and resolve the promise
