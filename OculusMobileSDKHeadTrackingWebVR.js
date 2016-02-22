@@ -163,13 +163,11 @@
 			var eyeHeight = fullScreenHeight / 2;
 			rightEyeParameters.renderRect.x = rightEyeParameters.renderRect.left = eyeWidth;
 			rightEyeParameters.renderRect.right = rightEyeParameters.renderRect.x + eyeWidth;
-			rightEyeParameters.renderRect.bottom = eyeHeight;
 			leftEyeParameters.renderRect.x = 0;
 			leftEyeParameters.renderRect.right = eyeWidth;
-			leftEyeParameters.renderRect.bottom = eyeHeight;
 			rightEyeParameters.renderRect.y = rightEyeParameters.renderRect.top = leftEyeParameters.renderRect.y = leftEyeParameters.renderRect.top = 0;
 			rightEyeParameters.renderRect.width = leftEyeParameters.renderRect.width = eyeWidth;
-			rightEyeParameters.renderRect.height = leftEyeParameters.renderRect.height = fullScreenHeight;
+			rightEyeParameters.renderRect.height = leftEyeParameters.renderRect.height = rightEyeParameters.renderRect.bottom = leftEyeParameters.renderRect.bottom = fullScreenHeight;
 			// Create the position sensor VR device
 			var positionSensorVRDevice = new PositionSensorVRDevice();					
 			// Create the devices array and resolve the promise
