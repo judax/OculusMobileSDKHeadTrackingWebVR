@@ -1,0 +1,137 @@
+<html>
+    <head>
+        <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no' />
+    </head>
+    <body style="overflow:hidden; margin:0;">
+        <script src="../../js/OculusMobileSDKHeadTrackingWebVR.js"></script>
+        <script src="three.min.js"></script>
+        <script src="VREffect.js"></script>
+        <script src="VRControls.js"></script>
+        <script src="DeviceOrientationController.js"></script>
+        <script src="stats.min.js"></script>
+        <script>
+            function init() {
+                var deg2rad = Math.PI / 180;
+                var camera, scene, renderer, stats;
+                var vrEffect;
+                var vrControls;
+                var deviceOrientationController;
+                var useDeviceOrientation = true;
+
+                var rotAngle = 0;
+                var rotAxis = {"x":0, "y":1, "z":0};
+
+                var container = document.createElement( 'div' );
+                document.body.appendChild( container );
+
+                var animate = function(){
+
+                    if (useDeviceOrientation) {
+                        deviceOrientationController.update();
+                    }
+                    else {
+                        vrControls.update();
+                    }
+
+                    // rotAngle += 0.02;
+                    // camera.quaternion.setFromAxisAngle(rotAxis, rotAngle);
+
+                    vrEffect.render( scene, camera );
+                    // renderer.render(scene, camera);
+
+                    stats.update();
+
+                    requestAnimationFrame(animate);
+                }
+
+                function onWindowResize() {
+
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+
+                    vrEffect.setSize( window.innerWidth, window.innerHeight );
+
+                }
+
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+                camera.rotation.order = "XYZ";
+
+                scene = new THREE.Scene();
+                var folder = "";
+                var sides = [
+                    [folder + "posz.jpg", 0, 0, 100, 180 * deg2rad, 0, 0],
+                    [folder + "posx.jpg", 100, 0, 0, 0, -90 * deg2rad, 180 * deg2rad],
+                    [folder + "negz.jpg", 0, 0, -100, 180 * deg2rad, 180 * deg2rad, 0],
+                    [folder + "negx.jpg", -100, 0, 0, 0, 90 * deg2rad, 180 * deg2rad ],
+                    [folder + "negy.jpg", 0, 100, 0, 90 * deg2rad, 0, 0 ],
+                    [folder + "posy.jpg", 0, -100, 0, -90 * deg2rad, 0, 0 ]
+                ];
+
+                var cube = new THREE.Object3D();
+                for (var i = 0; i < sides.length; i ++) {
+
+                    var texture, material, plane;
+
+                    texture = THREE.ImageUtils.loadTexture( sides[i][0] );
+
+                    material = new THREE.MeshLambertMaterial({ map : texture });
+                    plane = new THREE.Mesh(new THREE.PlaneGeometry(200, 200, 10, 10), material);
+                    plane.material.side = THREE.DoubleSide;
+
+                    plane.position.set(
+                        sides[i][1],
+                        sides[i][2],
+                        sides[i][3]
+                    );
+                    plane.rotation.set(
+                        sides[i][4],
+                        sides[i][5],
+                        sides[i][6]
+                    );
+                    cube.add(plane);
+                }
+                cube.rotation.z = 180 * deg2rad;
+                scene.add(cube);
+
+                var light = new THREE.AmbientLight( 0xFFFFFF );
+                scene.add( light );
+
+                renderer = new THREE.WebGLRenderer();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.domElement.style.position = 'absolute';
+                renderer.domElement.style.top = 0;
+                container.appendChild(renderer.domElement);
+
+                // VR split screen
+                vrEffect = new THREE.VREffect( renderer );
+
+                // Input
+                // WebVR controls
+                vrControls = new THREE.VRControls( camera );
+                // devieorientation controls
+                deviceOrientationController = new DeviceOrientationController(camera, renderer.domElement);
+                deviceOrientationController.enableManualDrag = false;
+                deviceOrientationController.enableManualZoom = false;
+                deviceOrientationController.connect();
+                // Change from WebVR to deviceorientation with double taps
+                window.addEventListener("touchstart", function(event) {
+                    if (event.touches.length > 1) {
+                        useDeviceOrientation = !useDeviceOrientation;
+                        alert(useDeviceOrientation ? "Using deviceorientation" : "Using Oculus Mobile SDK Head Tracking");
+                    }
+                });
+
+                stats = new Stats();
+                stats.domElement.style.position = 'absolute';
+                stats.domElement.style.top = '0px';
+                container.appendChild( stats.domElement );
+
+                window.addEventListener( 'resize', onWindowResize, false );
+
+                animate();
+            }
+
+            addEventListener("load", init);
+        </script>
+    </body>
+</html>
