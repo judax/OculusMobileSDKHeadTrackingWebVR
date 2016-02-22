@@ -5,44 +5,50 @@
 	<body>
 		<script src="../../js/OculusMobileSDKHeadTrackingWebVR.js"></script>
 		<script>
-			// All the information about the WebVR API has been taken from https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API
-			if (navigator.getVRDevices) {
-				navigator.getVRDevices().then(function(devices) {
-					// Names of the eyes
-					var eyeNames = ["right", "left"];
-					var s = "";
-					// Names of the FOVs in each eye
-					var fovNames = ["minimumFieldOfView", "maximumFieldOfView", "recommendedFieldOfView", "currentFieldOfView"];
-					for (var i = 0; i < devices.length; ++i) {
-						// If the device is an HMD, get all the parameters for each eye
-						if (devices[i] instanceof HMDVRDevice)  {
-							var vrHMD = devices[i];
-							s += "VRDevice: hardwareUnitId: " + vrHMD.hardwareUnitId + ", deviceId: " + vrHMD.deviceId + ", vrHMD.deviceName: " + vrHMD.deviceName + "\n";
-		                    if (vrHMD.getEyeParameters) {
-		                    	for (var j = 0; j < eyeNames.length; j++) {
-		                    		var eyeName = eyeNames[j];
-		                    		s += "  " + eyeName + " eye:\n";
-		                    		var eyeParameters = vrHMD.getEyeParameters(eyeName);
-		                    		// FOVs
-		                    		for (var k = 0; k < fovNames.length; k++) {
-		                    			var fovName = fovNames[k];
-		                    			var fov = eyeParameters[fovName];
-			                    		s += "    " + fovName + ": u:" + fov.upDegrees + ", d:" + fov.downDegrees + ", r:" + fov.rightDegrees + ", l:" + fov.leftDegrees + "\n";
-		                    		}
-		                    		// eyeTranslation
-		                    		var eyeTranslation = eyeParameters.eyeTranslation;
-		                    		s += "    eyeTranslation: x: " + eyeTranslation.x + ", y: " + eyeTranslation.y + ", z: " + eyeTranslation.z + "\n";
-		                    		// renderRect
-		                    		var renderRect = eyeParameters.renderRect;
-		                    		s += "    renderRect: x: " + renderRect.x + ", y: " + renderRect.y + ", width: " + renderRect.width + ", height: " + renderRect.height + ", top: " + renderRect.top + ", bottom: " + renderRect.bottom + ", right: " + renderRect.right + ", left: " + renderRect.left + "\n";
-		                    	}
-		                    }
+			function getHMDVRDeviceInfo() {
+				// All the information about the WebVR API has been taken from https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API
+				if (navigator.getVRDevices) {
+					navigator.getVRDevices().then(function(devices) {
+						// Names of the eyes
+						var eyeNames = ["right", "left"];
+						var s = "";
+						// Names of the FOVs in each eye
+						var fovNames = ["minimumFieldOfView", "maximumFieldOfView", "recommendedFieldOfView", "currentFieldOfView"];
+						for (var i = 0; i < devices.length; ++i) {
+							// If the device is an HMD, get all the parameters for each eye
+							if (devices[i] instanceof HMDVRDevice)  {
+								var vrHMD = devices[i];
+								s += "VRDevice: hardwareUnitId: " + vrHMD.hardwareUnitId + ", deviceId: " + vrHMD.deviceId + ", vrHMD.deviceName: " + vrHMD.deviceName + "\n";
+			                    if (vrHMD.getEyeParameters) {
+			                    	for (var j = 0; j < eyeNames.length; j++) {
+			                    		var eyeName = eyeNames[j];
+			                    		s += "  " + eyeName + " eye:\n";
+			                    		var eyeParameters = vrHMD.getEyeParameters(eyeName);
+			                    		// FOVs
+			                    		for (var k = 0; k < fovNames.length; k++) {
+			                    			var fovName = fovNames[k];
+			                    			var fov = eyeParameters[fovName];
+				                    		s += "    " + fovName + ": u:" + fov.upDegrees + ", d:" + fov.downDegrees + ", r:" + fov.rightDegrees + ", l:" + fov.leftDegrees + "\n";
+			                    		}
+			                    		// eyeTranslation
+			                    		var eyeTranslation = eyeParameters.eyeTranslation;
+			                    		s += "    eyeTranslation: x: " + eyeTranslation.x + ", y: " + eyeTranslation.y + ", z: " + eyeTranslation.z + "\n";
+			                    		// renderRect
+			                    		var renderRect = eyeParameters.renderRect;
+			                    		s += "    renderRect: x: " + renderRect.x + ", y: " + renderRect.y + ", width: " + renderRect.width + ", height: " + renderRect.height + ", top: " + renderRect.top + ", bottom: " + renderRect.bottom + ", right: " + renderRect.right + ", left: " + renderRect.left + "\n";
+			                    	}
+			                    }
+							}
 						}
-					}
-					console.log(s);
-					alert(s);
-				});
+						console.log(s);
+						alert(s);
+					});
+				}
 			}
+			window.addEventListener("load", getHMDVRDeviceInfo);
 		</script>
+		<div style="text-align:center;">
+			<input type="button" value="Click me to get the HMDVRDevice information" style="position:fixed; transform: translate(-50%, -50%); top:50%; left:50%;" onclick="return getHMDVRDeviceInfo();"></input>
+		</div>
 	</body>
 </html>
