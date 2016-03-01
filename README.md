@@ -17,6 +17,18 @@ In order to include the WebVR shim API, please, include the following line befor
 <script src="OculusMovileSDKHeadTrackingWebVR.js"></script>
 ```
 
+## Configuration
+
+The polyfill can be configured and debugged with various options. The following
+are supported:
+
+```
+WebVRConfig = {
+  // Forces the injection of the WebVR API using the native OculusMobileSDKHeadTracking extension object overriding any existing WebVR API.
+  //FORCE_ENABLE_VR: true, // Default: false.
+}
+```
+
 ## Related Projects
 
 * [OculusMobileSDKHeadTracking](https://github.com/judax/OculusMobileSDKHeadTracking): The Oculus Mobile SDK head tracking handling basic library.
