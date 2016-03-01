@@ -1,17 +1,9 @@
 (function() {
-
-	window.addEventListener('error', function(event) {
-		var errorMessage = event.message;
-		var url = event.filename;
-		var lineNumber = event.lineno;
-		var columnNumber = event.colno;
-		alert("ERROR: " + errorMessage + " at " + url + " : " + lineNumber + " : " + columnNumber);
-	});
-
+	window.WebVRConfig = window.WebVRConfig || {};
 
 	var extensionPresent = typeof(OculusMobileSDKHeadTracking) != 'undefined';
 
-	if (extensionPresent && !navigator.getVRDevices) {
+	if (extensionPresent && (!navigator.getVRDevices || WebVRConfig.FORCE_ENABLE_VR)) {
 		// I love explicit names, but a simpler one makes my life easier
 		var extension = OculusMobileSDKHeadTracking;
 
@@ -84,9 +76,9 @@
 
 		// VRDevice 
 		VRDevice = function() {
-			this.hardwareUnitId = '';
-			this.deviceId = '';
-			this.deviceName = '';
+			this.hardwareUnitId = 'OculusMobileSDKHeadTracking hwUnitId';
+			this.deviceId = 'OculusMobileSDKHeadTracking deviceId';
+			this.deviceName = 'OculusMobileSDKHeadTracking deviceName';
 			return this;
 		};
 
@@ -138,6 +130,9 @@
 
 		// Listen to the start event
 		extension.addEventListener('start', function(event) {
+			event.xFOV = 80;
+			event.yFOV = 80;
+
 			// Create the HMD VR device
 			var hmdVRDevice = new HMDVRDevice();
 			// Setup left/right eye parameters depending on the information from the event.
