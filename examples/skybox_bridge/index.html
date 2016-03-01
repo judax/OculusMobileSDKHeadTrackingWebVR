@@ -70,13 +70,63 @@
             <div id="fullscreen_msg_text_right" class="content" >
             </div>
         </div>
+        <script id="webvrpolyfill"></script>
+        <!-- Error handling -->
+        <script>
+            window.addEventListener('error', function(event) {
+                var errorMessage = event.message;
+                var url = event.filename;
+                var lineNumber = event.lineno;
+                var columnNumber = event.colno;
+                alert("ERROR: " + errorMessage + " at " + url + " : " + lineNumber + " : " + columnNumber);
+            });
+        </script>
+        <!-- Check the URL arguments to see what webv polyfill should be used -->
+        <script>
+            function parseQueryArguments() {
+                var args = document.location.search.substring(1).split('&');
+                var argsParsed = {};
+                for (i=0; i < args.length; i++) {
+                    var arg = decodeURIComponent(args[i]);
+                    if (arg.indexOf('=') == -1) {
+                        argsParsed[arg.trim()] = true;
+                    }
+                    else {
+                        var kvp = arg.split('=');
+                        argsParsed[kvp[0].trim()] = kvp[1].trim();
+                    }
+                }
+                return argsParsed;
+            }
 
-        <script src="../../js/OculusMobileSDKHeadTrackingWebVR.js"></script>
+            var useDeviceOrientation = true;
+            var initialMessageShouldBeShown = true;
+            var currentHeadTrackingModeIndex = 0;
+            var args = parseQueryArguments();
+            var webvrPolyfillScriptTag = document.getElementById("webvrpolyfill");
+            webvrPolyfillScriptTag.async = false;
+            if (args.oculusMobileSDKHeadTracking) {
+                webvrPolyfillScriptTag.src = "../../js/OculusMobileSDKHeadTrackingWebVR.js";
+                useDeviceOrientation = false;
+                currentHeadTrackingModeIndex = 2;
+                initialMessageShouldBeShown = false;
+            }
+            else {
+                webvrPolyfillScriptTag.src = "webvr-polyfill.js";
+                    if (args.webvrpolyfill) {
+                    useDeviceOrientation = false;
+                    currentHeadTrackingModeIndex = 1;
+                    initialMessageShouldBeShown = false;
+                }
+            }
+        </script>
+        <!-- All the libraries the demo depends on -->
         <script src="three.min.js"></script>
         <script src="VREffect.js"></script>
         <script src="VRControls.js"></script>
         <script src="DeviceOrientationController.js"></script>
         <script src="stats.min.js"></script>
+        <!-- The demo itself -->
         <script>
             function init() {
                 var SHOW_STATS = false;
@@ -87,7 +137,6 @@
                 var vrEffect;
                 var vrControls;
                 var deviceOrientationController;
-                var useDeviceOrientation = true;
 
                 // var rotAngle = 0;
                 // var rotAxis = {"x":0, "y":1, "z":0};
@@ -99,6 +148,56 @@
                     document.getElementById("fullscreen_msg_text_left"),
                     document.getElementById("fullscreen_msg_text_right")
                 ];
+
+                var headTrackingModes = [];
+                // Add deviceorientation head tracking
+                headTrackingModes.push(
+                    {
+                        name: "deviceorientation",
+                        activate: function() {
+                            useDeviceOrientation = true;
+                        }
+                    });
+                // Add WebVR polyfill head tracking
+                headTrackingModes.push(
+                    {
+                        name: "webvr-polyfill",
+                        activate: function() {
+                            location.href = "index.html?webvrpolyfill=true";
+                        }
+                    });
+                // Add Oculus Mobile SDK head tracking (only if the extension is present)
+                if (typeof(OculusMobileSDKHeadTracking) != 'undefined') {
+                    headTrackingModes.push(
+                        {
+                            name: "Gear VR",
+                            activate: function() {
+                                location.href = "index.html?oculusMobileSDKHeadTracking=true";
+                            }
+                        });
+                }
+
+                // function setWebVRPolyfill(jsFilePath) {
+                //     // Get rid of the getVRDevices so the polyfillers think they need to polyfill
+                //     navigator.getVRDevices = undefined;
+
+                //     // Load the corresponding polyfiller
+                //     var scriptTag = document.getElementById("webvrpolyfill");
+                //     var scriptTagParentNode = scriptTag.parentNode;
+                //     scriptTagParentNode.removeChild(scriptTag);
+                //     scriptTag.async = false;
+                //     scriptTag.src = jsFilePath;
+                //     scriptTagParentNode.appendChild(scriptTag);
+
+                //     // Check: show the name of the first VRDevice to verify the polyfiller change has been correctly performed
+                //     navigator.getVRDevices().then(function(devices) {
+                //         showMessage(devices[0].deviceName, true);
+                //     });
+
+                //     // Reset both the vrEffect and the vrControls to reset their internal references to the WebVR API
+                //     vrEffect = new THREE.VREffect( renderer );
+                //     vrControls = new THREE.VRControls( camera );
+                // }
 
                 function fadeoutMessage(timeout) {
                     timeout = typeof(timeout) == "number" ? timeout : DEFAULT_FADEOUT_TIMEOUT;
@@ -213,11 +312,12 @@
 
                 // Change from WebVR to deviceorientation with double taps
                 var tappedTwice = false;
-                var firstTap = true;
+                var firstTap = false;
+                var headTrackingChanged = false;
                 window.addEventListener("touchstart", function(event) {
-                    if (firstTap) {
+                    if (!firstTap) {
                         fadeoutMessage(0);
-                        firstTap = false;
+                        firstTap = true;
                     }
                     if(!tappedTwice) {
                         tappedTwice = true;
@@ -225,8 +325,13 @@
                         return false;
                     }
                     event.preventDefault();
-                    useDeviceOrientation = !useDeviceOrientation;
-                    showMessage(useDeviceOrientation ? "deviceorientation head tracking" : "Gear VR head tracking", true);
+                    currentHeadTrackingModeIndex++;
+                    if (currentHeadTrackingModeIndex >= headTrackingModes.length) {
+                        currentHeadTrackingModeIndex = 0;
+                    }
+                    headTrackingModes[currentHeadTrackingModeIndex].activate();
+                    showMessage(headTrackingModes[currentHeadTrackingModeIndex].name + " head tracking", true);
+                    headTrackingChanged = true;
                 });
 
                 if (SHOW_STATS) {
@@ -238,12 +343,27 @@
 
                 window.addEventListener( 'resize', onWindowResize, false );
 
-                showMessage(
-                    "Welcome to this WebVR demo.<br/>" +
-                    "<br/>" +
-                    "Tap to start.<br/>" +
-                    "Double tap to switch the head tracking mode.<br/>" + 
-                    "Using " + (useDeviceOrientation ? "deviceorientation" : "Gear VR") + " head tracking by default.");
+                function showInitialMessage() {
+                    // If head tracking has not changed since the last call to this function, show the message.
+                    if (!headTrackingChanged) {
+                        showMessage(
+                            "Welcome to this WebVR demo.<br/>" +
+                            "<br/>" +
+                            "Tap to start.<br/>" +
+                            "Double tap to switch the head tracking mode.<br/>" + 
+                            "Using " + headTrackingModes[currentHeadTrackingModeIndex].name + " head tracking by default.");
+                        firstTap = false;
+                    }
+                    headTrackingChanged = false;
+                    setTimeout(showInitialMessage, 60000);
+                }
+
+                if (initialMessageShouldBeShown) {
+                    showInitialMessage();
+                }
+                else {
+                    showMessage(headTrackingModes[currentHeadTrackingModeIndex].name + " head tracking", true);
+                }
 
                 animate();
             }
