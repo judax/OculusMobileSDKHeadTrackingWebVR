@@ -1,6 +1,6 @@
 # OculusMobileSDKHeadTrackingWebVR
 
-This project aims to provide a [WebVR API](https://mozvr.com/webvr-spec/) [(and the deprecated version](https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API) shim/polyfill implementation that uses the [OculusMobileSDKHeadTracking](https://github.com/judax/OculusMobileSDKHeadTracking) implementation of a native [Crosswalk extension](https://github.com/judax/OculusMobileSDKHeadTrackingXWalkViewExtension) or [Cordova plugin](https://github.com/judax/cordova-plugin-oculusmobilesdkheadtracking.git). 
+This project aims to provide a [WebVR API 1.0](https://mozvr.com/webvr-spec/) (and the [deprecated API version](https://developer.mozilla.org/en-US/docs/Web/API/WebVR_API)) shim/polyfill implementation that uses the [OculusMobileSDKHeadTracking](https://github.com/judax/OculusMobileSDKHeadTracking) implementation of a native [Crosswalk extension](https://github.com/judax/OculusMobileSDKHeadTrackingXWalkViewExtension) or [Cordova plugin](https://github.com/judax/cordova-plugin-oculusmobilesdkheadtracking.git). 
 
 ## Folder Structure
 
