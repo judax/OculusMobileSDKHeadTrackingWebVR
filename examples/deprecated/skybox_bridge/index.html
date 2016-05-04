@@ -81,12 +81,6 @@
                 alert("ERROR: " + errorMessage + " at " + url + " : " + lineNumber + " : " + columnNumber);
             });
         </script>
-
-        <!-- Be able to get back to the deprecated WebVR API -->
-        <script>
-            // WebVRConfig = { ENABLE_DEPRECATED_API: true };
-        </script>
-
         <!-- Check the URL arguments to see what webv polyfill should be used -->
         <script>
             function parseQueryArguments() {
@@ -130,10 +124,13 @@
             if (useDeviceOrientation) alert("Using device orientation!");
         </script>
         <!-- All the libraries the demo depends on -->
-        <script src="three.76.js"></script>
+        <script src="/webgl2opengl/tests/threejs/three.74.js"></script>
+        <script src="/webgl2opengl/tests/threejs/VREffect.js"></script>
+        <script src="/webgl2opengl/tests/threejs/VRControls.js"></script>
+<!--         <script src="three.min.js"></script>
         <script src="VREffect.js"></script>
         <script src="VRControls.js"></script>
-        
+ -->        
         <script src="DeviceOrientationController.js"></script>
         <script src="stats.min.js"></script>
         <!-- The demo itself -->
@@ -146,7 +143,6 @@
                 var camera, scene, renderer, stats;
                 var vrEffect;
                 var vrControls;
-                var fullscreen = false;
                 var deviceOrientationController;
 
                 // var rotAngle = 0;
@@ -317,7 +313,6 @@
 
                 // VR split screen
                 vrEffect = new THREE.VREffect( renderer );
-                vrEffect.setSize( window.innerWidth, window.innerHeight );
 
                 // Input
                 // WebVR controls
@@ -382,20 +377,6 @@
                 else {
                     showMessage(headTrackingModes[currentHeadTrackingModeIndex].name + " head tracking", true);
                 }
-
-                window.addEventListener("click", function() {
-                    if (!fullscreen) {
-                        vrEffect.requestPresent();
-                        // enterFullscreen(renderer.domElement);
-                        fullscreen = true;
-                    }
-                    else {
-                        vrEffect.exitPresent();
-                        // exitFullscreen(renderer.domElement);
-                        fullscreen = false;
-                    }
-                });
-
 
                 animate();
             }
