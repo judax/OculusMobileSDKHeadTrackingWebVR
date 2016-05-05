@@ -149,7 +149,7 @@ THREE.VREffect = function ( renderer, onError ) {
 
 	}, false );
 
-	this.setFullScreen = function ( boolean ) {
+	this.setFullScreen = function ( boolean, distortion ) {
 
 		return new Promise( function ( resolve, reject ) {
 
@@ -170,7 +170,7 @@ THREE.VREffect = function ( renderer, onError ) {
 
 				if ( boolean ) {
 
-					resolve( vrHMD.requestPresent( [ { source: canvas, predistorted: true } ] ) );
+					resolve( vrHMD.requestPresent( [ { source: canvas, predistorted: distortion } ] ) );
 
 				} else {
 
@@ -203,9 +203,9 @@ THREE.VREffect = function ( renderer, onError ) {
 
 	};
 
-	this.requestPresent = function () {
+	this.requestPresent = function (distortion) {
 
-		return this.setFullScreen( true );
+		return this.setFullScreen( true, distortion );
 
 	};
 

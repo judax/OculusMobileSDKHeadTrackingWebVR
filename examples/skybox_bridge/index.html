@@ -127,7 +127,7 @@
                 }
             }
 
-            if (useDeviceOrientation) alert("Using device orientation!");
+            // if (useDeviceOrientation) alert("Using device orientation!");
         </script>
         <!-- All the libraries the demo depends on -->
         <script src="three.76.js"></script>
@@ -146,7 +146,6 @@
                 var camera, scene, renderer, stats;
                 var vrEffect;
                 var vrControls;
-                var fullscreen = false;
                 var deviceOrientationController;
 
                 // var rotAngle = 0;
@@ -332,6 +331,8 @@
                 var tappedTwice = false;
                 var firstTap = false;
                 var headTrackingChanged = false;
+                var tappedTwiceTiemoutId = null;
+                var inVR = false;
                 window.addEventListener("touchstart", function(event) {
                     if (!firstTap) {
                         fadeoutMessage(0);
@@ -339,16 +340,24 @@
                     }
                     if(!tappedTwice) {
                         tappedTwice = true;
-                        setTimeout( function() { tappedTwice = false; }, 300 );
+                        tappedTwiceTiemoutId = setTimeout( function() { 
+                            tappedTwice = false; 
+                            if (!inVR) {
+                                inVR = true;
+                                vrEffect.requestPresent();
+                            }
+                        }, 300 );
                         return false;
                     }
+                    clearTimeout(tappedTwiceTiemoutId);
+                    tappedTwice = false;
                     event.preventDefault();
                     currentHeadTrackingModeIndex++;
                     if (currentHeadTrackingModeIndex >= headTrackingModes.length) {
                         currentHeadTrackingModeIndex = 0;
                     }
                     headTrackingModes[currentHeadTrackingModeIndex].activate();
-                    showMessage(headTrackingModes[currentHeadTrackingModeIndex].name + " head tracking", true);
+                    showMessage(headTrackingModes[currentHeadTrackingModeIndex].name + " head tracking.<br/></br>Tap to enable VR!</br>Double tap to switch the head tracking mode.", true);
                     headTrackingChanged = true;
                 });
 
@@ -367,7 +376,7 @@
                         showMessage(
                             "Welcome to this WebVR demo.<br/>" +
                             "<br/>" +
-                            "Tap to start.<br/>" +
+                            "Tap to enable VR!<br/>" +
                             "Double tap to switch the head tracking mode.<br/>" + 
                             "Using " + headTrackingModes[currentHeadTrackingModeIndex].name + " head tracking by default.");
                         firstTap = false;
@@ -380,22 +389,8 @@
                     showInitialMessage();
                 }
                 else {
-                    showMessage(headTrackingModes[currentHeadTrackingModeIndex].name + " head tracking", true);
+                    showMessage(headTrackingModes[currentHeadTrackingModeIndex].name + " head tracking.<br/></br>Tap to enable VR!</br>Double tap to switch the head tracking mode.", true);
                 }
-
-                window.addEventListener("click", function() {
-                    if (!fullscreen) {
-                        vrEffect.requestPresent();
-                        // enterFullscreen(renderer.domElement);
-                        fullscreen = true;
-                    }
-                    else {
-                        vrEffect.exitPresent();
-                        // exitFullscreen(renderer.domElement);
-                        fullscreen = false;
-                    }
-                });
-
 
                 animate();
             }
