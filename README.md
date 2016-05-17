@@ -35,6 +35,10 @@ WebVRConfig = {
 }
 ```
 
+## Future work, improvements and random ideas
+
+* Add barrel distortion to the WebVR polyfill.
+
 ## Related Projects
 
 * [OculusMobileSDKHeadTracking](https://github.com/judax/OculusMobileSDKHeadTracking): The Oculus Mobile SDK head tracking handling basic library.
