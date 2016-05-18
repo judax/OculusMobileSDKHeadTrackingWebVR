@@ -9,9 +9,9 @@ This project aims to provide a [WebVR API 1.0](https://mozvr.com/webvr-spec/) (a
 
 # How to use it
 
-The [OculusMobileSDKHeadTrackingXWalkViewExtension](https://github.com/judax/OculusMobileSDKHeadTrackingXWalkViewExtension) project includes [a test](https://github.com/judax/OculusMobileSDKHeadTrackingXWalkViewExtension/tree/master/test) that automatically injects this file when a web page is being loaded.
+The [OculusMobileSDKHeadTrackingXWalkViewExtension](https://github.com/judax/OculusMobileSDKHeadTrackingXWalkViewExtension) project includes [a test](https://github.com/judax/OculusMobileSDKHeadTrackingXWalkViewExtension/tree/master/test) that automatically injects this file when a web page is being loaded. You can read on [how to use the libray/test](https://github.com/judax/OculusMobileSDKHeadTrackingXWalkViewExtension#how-to-use-the-library).
 
-If you would like to create your own app your could either:
+If you would like to create your own app, you could choose one of the following options:
 
 1. Inject the JS code yourself (similar to [the test](https://github.com/judax/OculusMobileSDKHeadTrackingXWalkViewExtension/tree/master/test))
 2. Include the JS file in your web app before any other script.
@@ -20,7 +20,7 @@ If you would like to create your own app your could either:
 <script src="OculusMovileSDKHeadTrackingWebVR.js"></script>
 ```
 
-The polyfill does not override any pre-existing WebVR API by default. Check the Configuration section down below.
+The polyfill does not override any pre-existing WebVR API by default. Check the [Configuration](https://github.com/judax/OculusMobileSDKHeadTrackingWebVR#configuration) section down below.
 
 ## Configuration
 
